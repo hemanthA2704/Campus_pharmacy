@@ -1,0 +1,22 @@
+<%- include("partials/header") -%>
+
+<div id="login-container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/73/Logo_IIT_Bhilai.png" alt="IIT Bhilai Logo" id="iit-logo" width="200" height="200">
+    <h1>Indian Institute of Technology Bhilai Campus Pharmacy</h1>
+    <h2>Forgot Password</h2>
+
+
+    <form action="authenticate.php" method="post">
+        <label for="email">IIT Bhilai Email:</label>
+        <input type="email" id="email" name="email" required placeholder="username@iitbhilai.ac.in">
+
+
+        <button type="submit">Submit</button>
+    </form>
+<!---->
+<!--        <a href="forgot_password.php" class="forgot-password">Forgot Password?</a>-->
+<!--        <p>New user? <a href="file:///Users/msapple/Desktop/study/CSD/three/registration.html">Register here</a></p>-->
+
+</div>
+
+<%- include("partials/footer") -%>
