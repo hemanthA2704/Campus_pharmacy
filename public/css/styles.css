@@ -41,6 +41,7 @@ input {
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
+    
 }
 
 button {
@@ -78,3 +79,24 @@ button:hover {
 #userType {
     width: 50%;
 }
+
+.toggle-password {
+    position: relative;
+    margin-left: -25px;
+    cursor: pointer;
+    user-select: none;
+
+}
+
+.password-match-feedback {
+    color: #008000;
+}
+
+.password-mismatch-feedback {
+    color: #FF0000;
+}
+
+.pass {
+    position: relative;
+}
+

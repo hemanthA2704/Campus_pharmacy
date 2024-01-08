@@ -1,0 +1,19 @@
+<%- include("partials/header"); -%>
+
+        <h2>Forgot Password</h2>
+
+        <form id="forgotPasswordForm" action="/forget" method="post" >
+            <label for="email">IIT Bhilai Email:</label>
+            <input type="email" id="email" name="email" required placeholder="username@iitbhilai.ac.in">
+            <button type="submit">Submit</button>
+            </br>
+            <p><%= message %></p>
+        </form>
+
+    </div>
+    <script>
+        
+    </script>
+
+<%- include("partials/footer"); -%>
+
