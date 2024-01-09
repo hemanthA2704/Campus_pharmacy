@@ -7,6 +7,7 @@ const app = express();
 const bcrypt = require("bcrypt");
 const otpGenerator = require('otp-generator')
 const nodemailer = require('nodemailer');
+const redis = require("redis");
 
 // Setting the ejs template engine for our server
 app.set("view engine","ejs");
@@ -45,7 +46,6 @@ const transporter = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-      // TODO: replace `user` and `pass` values from <https://forwardemail.net>
       user: process.env.MAIL_HOST,
       pass: process.env.MAIL_PASS,
     },
@@ -61,12 +61,12 @@ const otpSchema = new mongoose.Schema({
     otp: {
         type: String,
         required: true,
-    }
+    },
     // createdAt: {
     //     type: Date,
     //     default: Date.now,
-    //     expires: 60 * 5, // The document will be automatically deleted after 5 minutes of its creation time
-    // },
+    //     expires: 60 , // The document will be automatically deleted after 1 minutes of its creation time
+    // }
 });
 
 const Otp = new mongoose.model( "Otp" , otpSchema)
@@ -77,7 +77,7 @@ async function send(otp,checkEmail) {
     const info = await transporter.sendMail({
       from: '"Hemanth" <ankadalahemanth@gmail.com>', // sender address
       to: checkEmail, // list of receivers
-      subject: "Hello ✔", // Subject line
+      subject: "OTP for forgot password.", // Subject line
       text: otp, // plain text body
       html: "Hey ! your otp for verfying your account is " + otp, 
     });
@@ -155,13 +155,19 @@ app.post("/forget",function(req,res){
             if (found){
                 const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false });
                 bcrypt.hash(otp,10,function(err,hash){
-                    const newOtp = new Otp({
-                        email : req.body.email,
-                        otp : hash,
-                        createdAt : Date.now
-                    })
-                    newOtp.save();
-                })
+                    Otp.findOne({email : checkEmail}).then(function(found){
+                        if (found) {
+                            found.otp = hash ;
+                            found.save();
+                        } else {
+                            const newOtp = new Otp({
+                                email : req.body.email,
+                                otp : hash
+                            })
+                            newOtp.save();
+                        }
+                    })                   
+                })                
                 send(otp,checkEmail).catch(console.error);
                 res.render("verify-otp",{email : req.body.email , message : ""})               
             } else {
@@ -181,6 +187,10 @@ app.post("/verify-otp",function(req,res){
             bcrypt.compare(req.body.otp , found.otp , function(err,result){
                 console.log(result)
                 if (result === true) {
+                    Otp.deleteOne({email : req.body.email}).then(function(user){
+                        console.log(user)
+                        console.log( "is successfully deleted !")
+                    })
                     res.render("change_password")
                 } else {
                     res.render("verify-otp",{email : req.body.email ,message : "Invalid OTP . Please try again !!"})
@@ -194,13 +204,14 @@ app.post("/verify-otp",function(req,res){
 
 
 
-
-
 app.post("/change_pwd",function(req,res){
+    console.log(req.body)
     User.findOneAndUpdate({email : req.body.email}).then(function(found){
+        console.log(found)
         bcrypt.hash(req.body.confirm_password,10,function(err,hash){
             if (!err) {
                 found.password = hash;
+                
                 found.save();
                 res.render("success.ejs")
             } else {

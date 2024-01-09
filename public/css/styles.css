@@ -100,3 +100,6 @@ button:hover {
     position: relative;
 }
 
+.mailId {
+    background-color: lightcyan;
+}
