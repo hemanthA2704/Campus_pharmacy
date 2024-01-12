@@ -7,7 +7,10 @@ const app = express();
 const bcrypt = require("bcrypt");
 const otpGenerator = require('otp-generator')
 const nodemailer = require('nodemailer');
-const redis = require("redis");
+const passport = require("passport");
+const session = require("express-session");
+const passportLocalMongoose = require("passport-local-mongoose");
+
 
 // Setting the ejs template engine for our server
 app.set("view engine","ejs");
@@ -22,6 +25,15 @@ app.use(express.static(__dirname+"/public"));
 
 app.use(express.json());
 
+app.use(session({
+    secret : "Some Secret Yoo !",
+    resave : false ,
+    saveUninitialized : false 
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 
 
@@ -34,7 +46,15 @@ const userSchema = new mongoose.Schema({
     type : String
 });
 
+userSchema.plugin(passportLocalMongoose)
+
 const User = new mongoose.model("User",userSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+
+passport.deserializeUser(User.deserializeUser()) ;
 
 
 app.get("/test",function(req,res){
@@ -220,7 +240,86 @@ app.post("/change_pwd",function(req,res){
         })
     })
 })
-       
+
+
+const productSchema = new mongoose.Schema({
+    id : Number ,
+    name : String,
+    price : Number ,
+    image : String,
+    description : String
+})
+
+
+const Product = new mongoose.model("Product",productSchema);
+
+
+app.get("/details/:customRoute",function(req,res) {
+    const productId = req.params.customRoute ;
+    Product.find({}).then(function(products){
+        Product.findOne({id : productId}).then(function(found){
+            res.render("detail" , { product : found , products : products});
+        })
+    })
+    
+    
+});
+
+
+app.get("/website",function(req,res){
+    Product.find({}).then(function(found){
+        res.render("home" , { products : found });
+    })
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.listen(3000 , function(){
     console.log("Server is running on port 3000 locally.");
