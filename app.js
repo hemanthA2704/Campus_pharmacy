@@ -6,105 +6,34 @@ const mongoose = require("mongoose");
 const app = express();
 const bcrypt = require("bcrypt");
 const otpGenerator = require('otp-generator')
-const nodemailer = require('nodemailer');
-const passport = require("passport");
-const session = require("express-session");
-const passportLocalMongoose = require("passport-local-mongoose");
+const axios = require("axios");
+
 
 
 // Setting the ejs template engine for our server
 app.set("view engine","ejs");
-
 // Middlewares
-
 // Adding body parser middleware to the app
 app.use(bodyParser.urlencoded({extended : true }))
 // Enabling the express to serve static files contained in public
 app.use(express.static(__dirname+"/public"));
 
-
 app.use(express.json());
-
-app.use(session({
-    secret : "Some Secret Yoo !",
-    resave : false ,
-    saveUninitialized : false 
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-
-
 
 // connect to database
 mongoose.connect("mongodb://localhost:27017/pharmaDB")
 
-const userSchema = new mongoose.Schema({
-    email : String,
-    password : String,
-    type : String
-});
+const {send , Otp} = require("./models/otp.js") ;
 
-userSchema.plugin(passportLocalMongoose)
+const User = require("./models/users") ;
 
-const User = new mongoose.model("User",userSchema);
-
-passport.use(User.createStrategy());
-
-passport.serializeUser(User.serializeUser());
-
-passport.deserializeUser(User.deserializeUser()) ;
-
+const Product = require("./models/products.js")
 
 app.get("/test",function(req,res){
-    res.render("forgot_pwd");
+    Product.find({}).then(function(products){
+        res.render("home",{products : products});
+    })
 });
-
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.MAIL_HOST,
-      pass: process.env.MAIL_PASS,
-    },
-  });
-
-
-
-const otpSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-    },
-    otp: {
-        type: String,
-        required: true,
-    },
-    // createdAt: {
-    //     type: Date,
-    //     default: Date.now,
-    //     expires: 60 , // The document will be automatically deleted after 1 minutes of its creation time
-    // }
-});
-
-const Otp = new mongoose.model( "Otp" , otpSchema)
-
-// async..await is not allowed in global scope, must use a wrapper
-async function send(otp,checkEmail) {
-    // send mail with defined transport object
-    const info = await transporter.sendMail({
-      from: '"Hemanth" <ankadalahemanth@gmail.com>', // sender address
-      to: checkEmail, // list of receivers
-      subject: "OTP for forgot password.", // Subject line
-      text: otp, // plain text body
-      html: "Hey ! your otp for verfying your account is " + otp, 
-    });
-  
-    console.log("Message sent: %s", info.messageId);
-}
-
 
 
 app.get("/",function(req,res){
@@ -112,20 +41,41 @@ app.get("/",function(req,res){
 });
 
 app.post("/",function(req,res){
-    User.findOne({email : req.body.email}).then(function(found){
-        if (found) {
-            bcrypt.compare(req.body.password, found.password ,function(err,result){
-                if (result === true){
-                    res.redirect("/website");
+    // console.log(req.body["g-recaptcha-response"]);
+    // console.log(req_body[0]);
+    const params = new URLSearchParams({
+        secret : "6LczpV8pAAAAAOzQDn-CRm1sK2qc7piaYjIqa_ZH",
+        response : req.body["g-recaptcha-response"]
+    })
+    axios({
+        method: 'post',
+        url: 'https://www.google.com/recaptcha/api/siteverify',
+        data: params 
+      }).then(function(response){
+        const data = response.data;
+        console.log(data)
+        if (data.success === true && data.score > 0.5) {
+            User.findOne({username : req.body.username}).then(function(found){
+                if (found) {
+                    bcrypt.compare(req.body.password, found.password ,function(err,result){
+                        if (result === true){
+                            res.redirect("/website");
+                        } else {
+                            res.render("login",{message : "Invalid credentials"})
+                    }
+                    });
+                    
                 } else {
-                    res.render("login",{message : "Invalid credentials"})
-            }
+                    res.render("login",{message : "User Not exists. Kindly Register to login."})
+                }
             });
-            
         } else {
-            res.redirect("/register")
+            res.redirect("/");
         }
-    });
+
+      })
+    // console.log(response)
+    
 });
 
 app.get("/register",function(req,res){
@@ -133,9 +83,9 @@ app.get("/register",function(req,res){
 })
 
 app.post("/register",function(req,res){
-    const email = req.body.email;
-    if (email.includes("@iitbhilai.ac.in")){
-        User.findOne({email : req.body.email}).then(function(found){
+    const username = req.body.username;
+    if (username.includes("@iitbhilai.ac.in")){
+        User.findOne({username : req.body.username}).then(function(found){
             if (found){
                 res.render("register",{message : "Username already exists"});
             } else {
@@ -144,7 +94,7 @@ app.post("/register",function(req,res){
                     bcrypt.hash(password , 10 , function(err,hash){
                         console.log(hash)
                         const user = User({
-                            email : req.body.email,
+                            username : req.body.username,
                             password : hash,
                             type : req.body.userType
                         });
@@ -169,19 +119,19 @@ app.get("/forget",function(req,res){
 })
 
 app.post("/forget",function(req,res){
-    const checkEmail = req.body.email
+    const checkEmail = req.body.username
     if (checkEmail.includes("@iitbhilai.ac.in")) {
-        User.findOne({email : checkEmail}).then(function(found){
+        User.findOne({username : checkEmail}).then(function(found){
             if (found){
                 const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false });
                 bcrypt.hash(otp,10,function(err,hash){
-                    Otp.findOne({email : checkEmail}).then(function(found){
+                    Otp.findOne({username : checkEmail}).then(function(found){
                         if (found) {
                             found.otp = hash ;
                             found.save();
                         } else {
                             const newOtp = new Otp({
-                                email : req.body.email,
+                                username : req.body.username,
                                 otp : hash
                             })
                             newOtp.save();
@@ -189,7 +139,7 @@ app.post("/forget",function(req,res){
                     })                   
                 })                
                 send(otp,checkEmail).catch(console.error);
-                res.render("verify-otp",{email : req.body.email , message : ""})               
+                res.render("verify-otp",{username : req.body.username , message : ""})               
             } else {
                 res.render("forgot_pwd",{ message : "User not found"});
             }
@@ -200,33 +150,31 @@ app.post("/forget",function(req,res){
 })
 
 app.post("/verify-otp",function(req,res){
-    Otp.findOne({email : req.body.email}).then(function(found){
+    Otp.findOne({username : req.body.username}).then(function(found){
         console.log(found)
         if (found){
             console.log(req.body.otp);
             bcrypt.compare(req.body.otp , found.otp , function(err,result){
                 console.log(result)
                 if (result === true) {
-                    Otp.deleteOne({email : req.body.email}).then(function(user){
+                    Otp.deleteOne({username : req.body.username}).then(function(user){
                         console.log(user)
                         console.log( "is successfully deleted !")
                     })
                     res.render("change_password")
                 } else {
-                    res.render("verify-otp",{email : req.body.email ,message : "Invalid OTP . Please try again !!"})
+                    res.render("verify-otp",{username : req.body.username ,message : "Invalid OTP . Please try again !!"})
                 }
             })
         } else {
-            res.render("verify-otp",{email : req.body.email ,message : "OTP expired!!"})
+            res.render("verify-otp",{username : req.body.username ,message : "OTP expired!!"})
         }
     });
 });
 
-
-
 app.post("/change_pwd",function(req,res){
     console.log(req.body)
-    User.findOneAndUpdate({email : req.body.email}).then(function(found){
+    User.findOneAndUpdate({username : req.body.username}).then(function(found){
         console.log(found)
         bcrypt.hash(req.body.confirm_password,10,function(err,hash){
             if (!err) {
@@ -241,85 +189,30 @@ app.post("/change_pwd",function(req,res){
     })
 })
 
-
-const productSchema = new mongoose.Schema({
-    id : Number ,
-    name : String,
-    price : Number ,
-    image : String,
-    description : String
+app.get("/detail/:id",function(req,res){
+    const id = req.params.id ;
+    Product.findOne({id : id}).then(function(found){
+        Product.find({}).then(function(products){
+            res.render("detail", {product : found , products : products })
+        })
+        
+    })
 })
 
 
-const Product = new mongoose.model("Product",productSchema);
+app.get("/checkout",function(req,res){
+    res.render("checkout")
+})
 
 
-app.get("/details/:customRoute",function(req,res) {
-    const productId = req.params.customRoute ;
-    Product.find({}).then(function(products){
-        Product.findOne({id : productId}).then(function(found){
-            res.render("detail" , { product : found , products : products});
-        })
-    })
-    
-    
+app.get("/profile",function(req,res){
+    res.render("profile" ,{ user : user})
 });
 
-
-app.get("/website",function(req,res){
-    Product.find({}).then(function(found){
-        res.render("home" , { products : found });
-    })
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+app.get("/cookie-ver",function(req,res){
+    console.log(req.body)
+    console.log(req.headers)
+})
 
 app.listen(3000 , function(){
     console.log("Server is running on port 3000 locally.");

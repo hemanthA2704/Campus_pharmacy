@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/3bbb4ed110.js" crossorigin="anonymous"></script>
+    <a  href="https://icons8.com/icon/18799/id-verified"></a><a href="https://icons8.com"></a>
+</head>
+<body class="pro">
+    <div class="container">
+        <header>
+            <div class="title">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/73/Logo_IIT_Bhilai.png" width="100px" height="100px" alt="">
+                <span class="logo-text">IIT Bhilai Campus Pharmacy </span>
+            </div>
+            <nav class="top-nav">
+                <a href="/">Home</a>
+                <a href="#">Categories</a>
+                <a href="#">Contact</a>
+                <!-- <a href="#">About</a> -->
+            </nav>
+            <div class="icon-container">
+                <div class="dropdown" style="margin-right: 80px;">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
+                    </svg>
+                    <div class="dropdown-options">
+                    <a href="profile.html">Profile</a>
+                    <a href="#">Delivery Status</a>
+                    <a href="previous-orders.html">Previous Orders</a>
+                    <a href="Medical-book.html">Medical Book</a>
+                    <a href="#">Doctor Consultation</a>
+                    </div>
+                </div>
+            </div>
+        </header>  
+    </div>
+    <div class="profile-content">
+        <div class="profile-content-txt">
+            <div class="roll-no">
+                <span class="roll-no-img"><img 
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAACsElEQVR4nO2YyWsUQRTGfzpMLiaCEsSTiCKKI+JFcRuiB0EvGnG5iApexOCWS/4DTQQ9iODFozuCJ9GDiPgnJBEJrqcZQUVwIxMPaXnwAkVTXd09djtVOB88SL/qfF1f6m0p6OL/QQ9wCWgCDWBMfcFhDIhiJr7g0LQI+UiAiNS2AtuMZ69iPnLYHOaetwN1x7rNGmXmlC3mswjJux4ZNlqGkGYHhDTLEJLlw1EH+Qr/sOREGuohCIkKtsLRFUL3ROiGlgt5Q+QBsAXoA/qB48CX0JL9fgJHFbgXkpDNDp6VIQlZ7OCphiRkhYOnPyQhux08AyEJqTt4doUkZJWDZ2NIQp47eF6EJCQCNlg41rfBUzjybuCZheNxiELeWDhehijkkYXjSUhCpoHrwKKEZngDaPks5CdwAViSgWupXi9NZ+SdAm4Dh4u460q7UFvTBuc64FPOUHsL7C9LyIG/4D0a4xoHzgJrgQVqNeAcMGG8Jyc6v2ghvQXcYErenEzZnKydMnKsrdv9qERr6TCZFTsMMYN4JEROIg0V4BqwWp+HjH5V9UHIeMZYH9b3X6sosUn1HfRByJkM314O/ND39xr+8+q75YMQqU4uzAOeJmy4pv4pH4TIdZGJgdjzCX3vs04GJvp07bsPQszSPaK+q3oSMgF8Vd8Ry54W6tq3PEIa/yC0jgG/1S8z2UP9Wcb/pMkgd2iNliREOraJPTpfRUbYLEupZDfzCOlRMUWfzISl/G7SnHBVtYrx/02u8ls05A/zXjciY0cc0vjuOHrMaaOv5GqIZWBQN9PSsSMrdgIzwGysr3QUVwwxQxoySajoSczo71zEI0iZvWzkzKR27JqW5l6tTsNGTsyqiLbG+LKxD/iQoThITngTTkmQAnAIuAu8A37pjPVKS6xUJ2ti/wENrOJeosNSTgAAAABJRU5ErkJggg==">
+                </span>
+                <span class="roll-no-text">Roll No:</span><%= user.id %>
+            </div>
+            <div class="student-name">
+                <span class="roll-no-img"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB8UlEQVR4nO2Zv0scQRSAP+EMQqwtUiWFEiJESJFgd4USC0X/CUE4sQmIYOEROAgiWlikCphGQawEG0XvAnY2QohIiggWZ+EF8+OSiHKMrExhYI+Zndm7fSf7wYNt5r337bKzM7OQkpLiyihQAqqASjiqQBEYiSrxTkDzqk4UojwJJTyGbURKAhpVhtizEfktoFFliF82IqpFwkjSDSopIv+AVWAM6AU6gYf6Og/8aQWRIvDIkP81sAVcSxU5Ajqw5xnwTaJIluj0SxM5xZ19SSIfPUTmJYkseIhMSRJ5e19E3nuIFCSJbHqIrEsSKTtKtAFnkkQU0OUg8tSjnhGXpBu40Q58liSyhDtrkkQ+eYh8kSSigHGHF31C2juidDyJIPLCs5YRn+ST2PNGsshX4IFFjQxwLFlE6dWsidkY6hjxLfDXXOL2OEe8yKVFjfNWEKlY1Ci3gsiBRY1D6SLfgZcWNbIxHM0acUla0wtH05nWXR7rfUxNgsgPYBnowZ1uYBG4SELkBMjpo9C4CHLldO6GiwRT64z+MjeKDDCtazVEJNiS9tE8nhu2wUYqIYOuLGejuHlV57Db5lvFTsjADyTHSkg/2zYDh0IGDpAcgyH9BL8mrMg7zu3NiLmodyKw3o1ppeobP3Uv1k8iJSWF/7gBEcbcFj8c47cAAAAASUVORK5CYII=">                </span>
+                <span class="student-name-text">Name:</span> <%= user.name %>
+            </div>
+            <div class="phone-no">
+                <span class="phone-no-img"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAACBUlEQVR4nO2ZQUtUURTHf1NWguimcBqjIFpZLUNchtiuaCMGBkNg9RECP0G0s1aT38CFqJVGMYsKBmFa2ASWUZAErbQZioyo4MmF+zZDM75zH+++8+D94L8cmB/3vnvPORdyclLlKlAHfgCvgVEyxiGgAgRtaQEnyAj9wOp/JMKskAGGgI0uEmHKKKYIfIggYdIESijkMFCLKBFmGYXMCCXCXEcZW44iO8BxFPHTUcRkAUV8jCFicg0lLMQU2UQJt2OK/EIJg8C/GCJrKKIaQ6SsrdINHPIGOIAiCkDDQeQSCpkUSjxCKQXglUBkGsWcA/4IquAzKOaeYFXWgT6UcsT+wagyVfsblZwFdgUyi0APSrklPMXm7IGhkopQZhbFo6EXQpn7WlemCHxy2GYHUcgp4ItQZgnoRSHngW9CmWcd7hmzWjfsKPYv8N6WSN4YsbNgiUyjrQIY63JPPbaDQi+MA7+FMk1bmz2JOJ2Z8tm/SGUCh2+s5EPmosM2k6ZlZwqJcwHYTlgmAJ4CJ32U/l89yLTsYZMopx0uTZfU8TRWknSYLvmOxyeKhwmK1PDMTWE/E0TMZVJgWNhpBvvkASliWuC7goFG0OX4VdGBmiP6paPEW2AARZhma0K43d7ZfkglRugK8NyW8EGHmKP8GBnhqK2K5+2DkXkG/AzcsW12Tg4psAf86ZgqZsaVBAAAAABJRU5ErkJggg==">                </span>
+                <span class="phone-no-text">Phone No:</span><%= user.phone %><span class="edit"><a href="profile-phone-edit.html"><i class="fa-regular fa-pen-to-square"></i></a></span>
+            </div>
+            <div class="batch-branch">
+                <span class="batch-branch-img"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAADEklEQVR4nO2ZW4hNURjHf0Yz7kqiXGYQDyaXlCRFybxJeFMTMhIvNJFLiheNeZuGeXBrMiYiD24hjObF5YFBUWjKkEsaZMooHMwcrdM3tZ3Omb3WPt86sx/Ov/6dac631tq/vc9a61vfhoIKKsi3pgLrgD1APVAH7AUqgBJiriKgCngOJPvxW2BFhvZjgVXAPuCQwG8DpucTYhzwIAQg6D/AOWA5UAqcBRJZYnuABqDYN8QY4JkDRCYo8/kbuAXUANXADuAE0CXfdwNNAu5FTTlA9LkTmJCl/8nAi0DsF2CWj0n9VwEkKQtBf5oBtEjsE2CQJsguJYikzJMwDZOnZ+KXaIJcVgT5YDlmg8Sbm6imXCZ5unst95gtEt+oCRK2Z7jarIBhqpLY5rg+EeORFmNWS+wRTZDHihBmv7DRYYk36Y+aziuCPLIc86HEL9UE2a8IctpivFGSCZgsYLgmyGpFkM0W4y2T2F+y46upUhFkveWYzRJvVi813VcEuec4L9dqgrxUBDGJYZhqgB+S35VpglxUBLkQMtZo2f0NxAGUtVERZEPIWCsl7gYeVCK/7Vwh7ljkWdcldjueNCSQWkdxpwXEGon9DozHo3I5JZq2YeqS2K141qIcQBZb9P9JYk2Rw7uuRYC4bdn3O4n3VngIaqIUBmwhuuXMb6NX0qacPMmlttXu0O9NaXNJzu3e9dQB5LVDv3PlCfbdgEpZLb2p3QHkvWPf89NSIrMA1AJTtCFKZZ23BfkJTHMco1gygLZAPyZlOQPM1IAoj3h+N8WL2RHHXCiHsUQAqC5qtX8OcFIOOlH3kYScMeZFBCoDjgUqnq22C0KRvBZokWw0qehWebUwOAJQRWDjNDc3q0ypZifQoXzxmfwG2C2pu4sWyHm+V/7+T6ZYvClAm09/lsqiS8H6lLQ9GvznCODKAACk+6oUJ2zcKG3MUp2SmTB3YwCRjGjzE0upPgYXk+6PwHEHp15A9sTgwtNtlupJLrO/NgYXnc0HB6pepe02F5CvMbjgbP7mApKMuYe6wBRUELr6B1E9+2ktBCDZAAAAAElFTkSuQmCC">                </span>
+                <span class="batch-branch-text">Batch-Branch:</span><%= user.batch %>
+            </div>
+            <div class="blood-grp">
+                <span class="roll-no-img"><img src="data:image/png;base64,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">                <span class="blood-grp-text">Blood Grp:</span><%= user.bg %>
+            </div>
+        </div>
+        <div class="profile-img">
+            <img src="./images/DP.png">
+        </div>
+    </div>
+    <div class="btn-logout">
+        <button type="button" class="btn btn-danger logout"><a href="/logout">Log Out</a></button>
+    </div>
+</body>
+</html>
