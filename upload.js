@@ -1,3 +1,6 @@
+const mongoose = require("mongoose");
+mongoose.connect("mongodb://localhost:27017/pharmaDB");
+
 const p = require("products.json");
 
 console.log(p.products)
@@ -5,7 +8,7 @@ console.log(p.products)
 
 
 const productSchema = new mongoose.Schema({
-    id : Number ,
+    id : String ,
     name : String,
     price : Number ,
     image : String,

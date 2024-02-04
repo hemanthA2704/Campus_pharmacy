@@ -7,7 +7,11 @@ const app = express();
 const bcrypt = require("bcrypt");
 const otpGenerator = require('otp-generator')
 const axios = require("axios");
+const session = require("express-session");
+const passport = require("passport");
 
+
+const auth = require("./models/auth.js") ;
 
 
 // Setting the ejs template engine for our server
@@ -20,8 +24,22 @@ app.use(express.static(__dirname+"/public"));
 
 app.use(express.json());
 
+
+app.use(session({
+    secret: 'keyboard cat',
+    resave: false, // don't save session if unmodified
+    saveUninitialized: false, // don't create session until something stored
+  }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+   
+
 // connect to database
 mongoose.connect("mongodb://localhost:27017/pharmaDB")
+
+
+app.use("/", auth) ;
 
 const {send , Otp} = require("./models/otp.js") ;
 
@@ -29,54 +47,52 @@ const User = require("./models/users") ;
 
 const Product = require("./models/products.js")
 
-app.get("/test",function(req,res){
-    Product.find({}).then(function(products){
-        res.render("home",{products : products});
-    })
-});
+const Order = require("./models/orders.js");
 
 
-app.get("/",function(req,res){
-    res.render("login",{message : ""});
-});
 
-app.post("/",function(req,res){
-    // console.log(req.body["g-recaptcha-response"]);
-    // console.log(req_body[0]);
-    const params = new URLSearchParams({
-        secret : "6LczpV8pAAAAAOzQDn-CRm1sK2qc7piaYjIqa_ZH",
-        response : req.body["g-recaptcha-response"]
-    })
-    axios({
-        method: 'post',
-        url: 'https://www.google.com/recaptcha/api/siteverify',
-        data: params 
-      }).then(function(response){
-        const data = response.data;
-        console.log(data)
-        if (data.success === true && data.score > 0.5) {
-            User.findOne({username : req.body.username}).then(function(found){
-                if (found) {
-                    bcrypt.compare(req.body.password, found.password ,function(err,result){
-                        if (result === true){
-                            res.redirect("/website");
-                        } else {
-                            res.render("login",{message : "Invalid credentials"})
-                    }
-                    });
+
+// app.get("/",function(req,res){
+//     res.render("login",{message : ""});
+// });
+
+// app.post("/",function(req,res){
+//     // console.log(req.body["g-recaptcha-response"]);
+//     // console.log(req_body[0]);
+//     const params = new URLSearchParams({
+//         secret : "6LczpV8pAAAAAOzQDn-CRm1sK2qc7piaYjIqa_ZH",
+//         response : req.body["g-recaptcha-response"]
+//     })
+//     axios({
+//         method: 'post',
+//         url: 'https://www.google.com/recaptcha/api/siteverify',
+//         data: params 
+//       }).then(function(response){
+//         const data = response.data;
+//         console.log(data)
+//         if (data.success === true && data.score > 0.5) {
+//             User.findOne({username : req.body.username}).then(function(found){
+//                 if (found) {
+//                     bcrypt.compare(req.body.password, found.password ,function(err,result){
+//                         if (result === true){
+//                             res.redirect("/website");
+//                         } else {
+//                             res.render("login",{message : "Invalid credentials"})
+//                     }
+//                     });
                     
-                } else {
-                    res.render("login",{message : "User Not exists. Kindly Register to login."})
-                }
-            });
-        } else {
-            res.redirect("/");
-        }
+//                 } else {
+//                     res.render("login",{message : "User Not exists. Kindly Register to login."})
+//                 }
+//             });
+//         } else {
+//             res.redirect("/");
+//         }
 
-      })
-    // console.log(response)
+//       })
+//     // console.log(response)
     
-});
+// });
 
 app.get("/register",function(req,res){
     res.render("register",{message : ""})
@@ -195,24 +211,68 @@ app.get("/detail/:id",function(req,res){
         Product.find({}).then(function(products){
             res.render("detail", {product : found , products : products })
         })
-        
     })
 })
 
 
 app.get("/checkout",function(req,res){
-    res.render("checkout")
-})
+    Product.find({}).then(function(products){
+        console.log(products);
+        res.render("checkout", {products : products});
+    })
+});
 
 
 app.get("/profile",function(req,res){
-    res.render("profile" ,{ user : user})
+    if (req.isAuthenticated()) {
+        res.render("profile" ,{ user : req.user})
+    } else {
+        res.redirect("/")
+    }
 });
+
+app.get("/prev_orders" , function(req,res){
+    res.render("prev_orders");
+})
 
 app.get("/cookie-ver",function(req,res){
     console.log(req.body)
     console.log(req.headers)
 })
+
+// CAN USE THIS PROPERTY AS WEB API FOR OUR PRODUCTS
+app.get("/api/products",function(req,res){
+    if (req.isAuthenticated()){
+        Product.find({}).then(function(products){
+            res.json(products);
+        })
+    } else {
+        // Actually here a separate authentication should be added so that after successful authentication it should be redirected to same page;
+        res.redirect("/")
+    }
+    
+})
+
+
+
+app.post("/payment",async function(req,res){
+    // console.log(req.body);
+    let totalQuantity = 0
+    const items = req.body.products ;
+    let totCost = 0
+    for (var i = 0 ; i<items.length ; i++) {
+        const curr = items[i].split(":") 
+        console.log(typeof(curr[0]),curr[0])
+        const id = curr[0]
+        const found = await Product.findOne({ id: id });
+        totCost = totCost + found.price * curr[1];
+        totalQuantity+=Number(curr[1])
+        console.log(totalQuantity);
+    }
+    
+}) ;
+
+
 
 app.listen(3000 , function(){
     console.log("Server is running on port 3000 locally.");
