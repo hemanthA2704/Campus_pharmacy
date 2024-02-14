@@ -10,9 +10,7 @@ const axios = require("axios");
 const session = require("express-session");
 const passport = require("passport");
 
-
 const auth = require("./models/auth.js") ;
-
 
 // Setting the ejs template engine for our server
 app.set("view engine","ejs");
@@ -24,7 +22,6 @@ app.use(express.static(__dirname+"/public"));
 
 app.use(express.json());
 
-
 app.use(session({
     secret: 'keyboard cat',
     resave: false, // don't save session if unmodified
@@ -32,6 +29,7 @@ app.use(session({
   }));
 
 app.use(passport.initialize());
+
 app.use(passport.session());
    
 
@@ -49,51 +47,7 @@ const Product = require("./models/products.js")
 
 const Order = require("./models/orders.js");
 
-
-
-
-// app.get("/",function(req,res){
-//     res.render("login",{message : ""});
-// });
-
-// app.post("/",function(req,res){
-//     // console.log(req.body["g-recaptcha-response"]);
-//     // console.log(req_body[0]);
-//     const params = new URLSearchParams({
-//         secret : "6LczpV8pAAAAAOzQDn-CRm1sK2qc7piaYjIqa_ZH",
-//         response : req.body["g-recaptcha-response"]
-//     })
-//     axios({
-//         method: 'post',
-//         url: 'https://www.google.com/recaptcha/api/siteverify',
-//         data: params 
-//       }).then(function(response){
-//         const data = response.data;
-//         console.log(data)
-//         if (data.success === true && data.score > 0.5) {
-//             User.findOne({username : req.body.username}).then(function(found){
-//                 if (found) {
-//                     bcrypt.compare(req.body.password, found.password ,function(err,result){
-//                         if (result === true){
-//                             res.redirect("/website");
-//                         } else {
-//                             res.render("login",{message : "Invalid credentials"})
-//                     }
-//                     });
-                    
-//                 } else {
-//                     res.render("login",{message : "User Not exists. Kindly Register to login."})
-//                 }
-//             });
-//         } else {
-//             res.redirect("/");
-//         }
-
-//       })
-//     // console.log(response)
-    
-// });
-
+const Med = require("./models/todo.js")
 app.get("/register",function(req,res){
     res.render("register",{message : ""})
 })
@@ -235,10 +189,10 @@ app.get("/prev_orders" , function(req,res){
     res.render("prev_orders");
 })
 
-app.get("/cookie-ver",function(req,res){
-    console.log(req.body)
-    console.log(req.headers)
-})
+// app.get("/cookie-ver",function(req,res){
+//     console.log(req.body)
+//     console.log(req.headers)
+// })
 
 // CAN USE THIS PROPERTY AS WEB API FOR OUR PRODUCTS
 app.get("/api/products",function(req,res){
@@ -250,7 +204,6 @@ app.get("/api/products",function(req,res){
         // Actually here a separate authentication should be added so that after successful authentication it should be redirected to same page;
         res.redirect("/")
     }
-    
 })
 
 
@@ -272,7 +225,84 @@ app.post("/payment",async function(req,res){
     
 }) ;
 
+app.get("/nurse/:id",function(req,res){
+    Med.findOne({id : req.params.id}).then(function(found){
+        if (found) {
+            res.render("nurse_checkout",{found : found}) ;
+        } else {
+            const user = {
+                id : req.params.id,
+                meds : []
+            } ;
+            const newUser = Med(user) ;
+            newUser.save();
+            res.redirect("/nurse/"+req.params.id);
+        }
+    })
+})
 
+app.post("/nurse/:id",function(req,res){
+    const newItem =  {
+        name : req.body.item ,
+        quantity : req.body.quantity
+    }
+    Med.updateOne({id : req.params.id},{$push : {meds : newItem}}).then(function(done){
+        if(done){
+            res.redirect("/nurse/"+req.params.id);
+        }
+    })
+  
+})
+
+// app.post("/nurse/update/:id",function(req,res){
+//     Med.findOneAndUpdate({id : req.params.id}).then(function(found){
+//         if (req.body.plus){
+
+//         }
+//     })
+// })
+// app.post("/sendToPharmacy",function(req,res){
+//     // console.log(req.headers["referer"].toString())
+//     // console.log(req.body)
+//     const ref = req.headers["referer"].toString();
+//     const orderId = ref.slice(28,37)
+//     Med.findOne({id : orderId}).then(function(found){
+//         req.
+//     })
+// })
+app.get("/pharmacy",function(req,res){
+    res.render("pharmacy_orders",{found : { meds : [] , id : ""}})
+});
+
+app.post("/searchOrder",function(req,res){
+    Med.findOne({id : req.body.orderid}).then(function(found){
+    if (found){      
+            res.render("pharmacy_orders",{found : found});
+        } else {
+            res.redirect("/pharmacy");
+        }
+    });
+});
+
+
+app.post("/pharmacyCheckout",function(req,res){
+    Med.findOne({id : req.body.baby}).then(function(found){
+        let items = [] ;
+        found.meds.forEach(element => {
+            Product.findOne({name : element.name}).then(function(data){
+                if (data){
+                    console.log(data.reimbursible)
+                    if (data.reimbursible === false){
+                        items.push(element);
+                    } 
+                }
+            })
+        });
+        console.log(items);
+        // res.render("pharmacy_checkout",{found : items});
+    })
+    
+});
 
 app.listen(3000 , function(){
     console.log("Server is running on port 3000 locally.");

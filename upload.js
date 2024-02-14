@@ -12,7 +12,8 @@ const productSchema = new mongoose.Schema({
     name : String,
     price : Number ,
     image : String,
-    description : String
+    description : String,
+    reimbursible : Boolean
 })
 
 
@@ -24,7 +25,8 @@ p.products.forEach((product) => {
         name : product.name,
         price : product.price,
         image : product.image,
-        description : product.description
+        description : product.description,
+        reimbursible : product.reimbursible 
     })
     prod.save().then(function(result){
         console.log("successfully saved")

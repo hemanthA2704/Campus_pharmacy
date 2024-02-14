@@ -5,8 +5,9 @@ const productSchema = new mongoose.Schema({
     name : String ,
     price :  Number ,
     image : String ,
-    description : String
-})
+    description : String ,
+    reimbursible : Boolean
+});
 
 const Product = new mongoose.model("Product",productSchema) ;
 
