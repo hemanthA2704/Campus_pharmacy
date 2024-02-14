@@ -28,21 +28,26 @@ passport.serializeUser(function(user,done){
 passport.deserializeUser(function(id, done) {
     // console.log(id)
     User.findOne({_id : id}).then(function(user) {
-        return done(null, {id : user._id });
+        return done(null, {id : user._id , type : user.type });
     });
 });
 
 const router = express.Router() ;
-
 
 router.get("/",function(req,res){
     // console.log(req);
     if (!req.isAuthenticated()) {
         res.render("login",{message : ""})
     }
-    Product.find({}).then(function(products){
-        res.render("home",{products : products});
-    });
+    else if (req.user.type === "Pharmacy"){
+        res.redirect("/pharmacy");
+    } else if(req.user.type === "Staff") {
+        res.redirect("/nurse")
+    } else{
+        Product.find({}).then(function(products){
+            res.render("home",{products : products});
+        });
+    }
 });
 
 

@@ -48,6 +48,9 @@ const Product = require("./models/products.js")
 const Order = require("./models/orders.js");
 
 const Med = require("./models/todo.js")
+
+const Past = require("./models/pastOrders.js");
+
 app.get("/register",function(req,res){
     res.render("register",{message : ""})
 })
@@ -89,7 +92,7 @@ app.get("/forget",function(req,res){
 })
 
 app.post("/forget",function(req,res){
-    const checkEmail = req.body.username
+    const checkEmail = req.body.username ;
     if (checkEmail.includes("@iitbhilai.ac.in")) {
         User.findOne({username : checkEmail}).then(function(found){
             if (found){
@@ -241,6 +244,25 @@ app.get("/nurse/:id",function(req,res){
     })
 })
 
+app.get("/nurse",function(req,res){
+    if (!req.isAuthenticated()){
+        res.redirect("/")
+    } else {
+        res.render("nurse")
+    }
+})
+
+app.post("/nurse",function(req,res){
+    console.log(req.body.orderid);
+    if (req.isAuthenticated) {
+        res.redirect("/nurse/"+req.body.orderid)
+    } else {
+        res.send("Please login as Staff to continue")
+    }
+    
+})
+
+
 app.post("/nurse/:id",function(req,res){
     const newItem =  {
         name : req.body.item ,
@@ -271,8 +293,18 @@ app.post("/nurse/:id",function(req,res){
 //     })
 // })
 app.get("/pharmacy",function(req,res){
-    res.render("pharmacy_orders",{found : { meds : [] , id : ""}})
+    if (!req.isAuthenticated()) {
+        res.redirect("/") ;
+    } else {
+        if (req.user.type === "Pharmacy"){
+            res.render("pharmacy_orders",{found : { meds : [] , id : ""}});
+        }
+        
+    } 
+    
 });
+
+
 
 app.post("/searchOrder",function(req,res){
     Med.findOne({id : req.body.orderid}).then(function(found){
@@ -282,27 +314,64 @@ app.post("/searchOrder",function(req,res){
             res.redirect("/pharmacy");
         }
     });
+}); 
+
+
+app.post("/pharmacyCheckout",async function(req,res){
+    const found = await Med.findOne({id : req.body.baby}) ;
+    let items = [] ;
+    let quantity = 0 ;
+    let reimbursible = 0 ;
+    let totPrice = 0 ;
+    let pay = 0 ;
+    for (var i = 0 ; i < found.meds.length ; i++) {
+        const data = await Product.findOne({name : found.meds[i].name}) ;
+        const newObject = Object.assign({},found.meds[i],data);
+        items.push(newObject) ;
+        // console.log(newObject) ;
+        // console.log(items);
+        quantity+=1 ;
+        if (data.reimbursible) {
+            reimbursible += found.meds[i].quantity*data.price ;
+        } else {
+            // console.log(typeof(found.meds[i].quantity)) ;
+            pay+=found.meds[i].quantity*data.price 
+        } 
+        totPrice += found.meds[i].quantity*data.price ;
+    }
+    const order = {
+        totalQuantity : quantity ,
+        totalPrice : totPrice ,
+        pay : pay ,
+        reimPrice : reimbursible
+    }
+    res.render("pharmacy_checkout",{total : items , order : order ,orderId : req.body.baby});
 });
 
 
-app.post("/pharmacyCheckout",function(req,res){
-    Med.findOne({id : req.body.baby}).then(function(found){
-        let items = [] ;
-        found.meds.forEach(element => {
-            Product.findOne({name : element.name}).then(function(data){
-                if (data){
-                    console.log(data.reimbursible)
-                    if (data.reimbursible === false){
-                        items.push(element);
-                    } 
-                }
-            })
-        });
-        console.log(items);
-        // res.render("pharmacy_checkout",{found : items});
+
+app.post("/paymentDone",function(req,res){
+    const orderId = req.body.order ;
+    // console.log(orderId) ;
+    // Med.findOne({id : orderId}).then(function(found){
+    //     const newOrder = Past(found) ;
+    //     newOrder.save();
+    // })
+    // Med.deleteOne({id : orderId}).then(function(order){
+    //     console.log("deleted successfully") ;
+    //     res.redirect("/pharmacy");
+    // })
+
+    Med.findOneAndDelete({id : orderId}).then(function(order){
+        const newOrder = Past({
+            id : order.id ,
+            meds : order.meds
+        })
+        newOrder.save();
+        res.redirect("/pharmacy");
     })
-    
 });
+
 
 app.listen(3000 , function(){
     console.log("Server is running on port 3000 locally.");

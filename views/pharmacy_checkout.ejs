@@ -44,38 +44,31 @@
                 <path d="M8 0a7.992 7.992 0 0 0-6.583 12.535 1 1 0 0 0 .12.183l.12.146c.112.145.227.285.326.4l5.245 6.374a1 1 0 0 0 1.545-.003l5.092-6.205c.206-.222.4-.455.578-.7l.127-.155a.934.934 0 0 0 .122-.192A8.001 8.001 0 0 0 8 0Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
             </svg>LOCATE ME</button> -->
             <h1>Products</h1>
-            <div class="list">
-                <div class="item">
-                    <!-- <img src="images/paracetamol.png">
-                    <div class="info">
-                        <div class="name">Paracetamol</div>
-                        <div class="price">₹22/1 product</div>
+            <% total.forEach(element => { %>
+                <div class="list">
+                    <div class="item">
+                        <div class="info">
+                            <div class="name"><%= element.name %></div>
+                            <div class="price">₹<%= element._doc.price %>/1 product</div>
+                        </div>
+                        <div class="quantity"><%= element.quantity %></div>
+
+                            <% if (element._doc.reimbursible === true){ %>
+                                <div>Reimbursible</div>
+                            <% } else { %>
+                                <div>Non-reimbursible</div>
+                            <% } %>
                     </div>
-                    <div class="quantity">5</div>
-                    <div class="returnPrice">₹110</div> -->
                 </div>
-
-            </div>
-        
-    </div>
-
-
+                
+            <% }); %>
+        </div>
+ 
         <div class="right">
             <h1>Order Details</h1>
 
             <div class="form">
-                <div class="group">
-                    <label for="name">Order ID</label>
-                    <input type="text" name="name" id="name">
-                </div>
-    
-                <div class="group">
-                    <label for="phone">OTP</label>
-                    <input type="text" name="phone" id="phone">
-                </div>
-    
-            
-    
+
                 <div class="group">
                     <label for="residence">Pharmacist</label>
                     <select name="residence" id="residence">
@@ -92,29 +85,30 @@
             <div class="return">
                 <div class="row">
                     <div>Total Quantity</div>
-                    <div class="totalQuantity">70</div>
+                    <div class="totalQuantity"><%= order.totalQuantity %></div>
                 </div>
                 <div class="row">
                     <div>Total Price</div>
-                    <div class="totalPrice">₹900</div>
+                    <div class="totalPrice"><%= order.totalPrice %></div>
                 </div>
                 <div class="row">
                     <div>Reimbursable Amount</div>
-                    <div class="totalPrice">₹900</div>
+                    <div class="totalPrice"><%= order.reimPrice %></div>
                 </div>
                 <div class="row">
                     <div>Final Amount</div>
-                    <div class="totalPrice">₹900</div>
+                    <div class="totalPrice"><%= order.pay %></div>
                 </div>
             </div>
-            <button class="coupon" style="font-size:medium">Verify OTP</button>
-            <button class="buttonCheckout" style="font-size:medium">Payment Done</button>
+            <form action="/paymentDone" method="post">
+                <button class="buttonCheckout" style="font-size:medium" name="order" value="<%= orderId %>">Payment Done</button>
+            </form>
             </div>
     </div>
 </div>
 
 
-<script src="checkout.js"></script>
+
 
 </body>
 </html>
