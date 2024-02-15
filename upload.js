@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const uri = "mongodb+srv://ankadalahemanth:3xAiyYnoqmSgvMPS@hemanth.be8cr9d.mongodb.net/pharmaDB?retryWrites=true&w=majority";
+const uri = process.env.URI ;
 
 try {
     // Connect to the MongoDB cluster
