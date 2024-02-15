@@ -1,5 +1,15 @@
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/pharmaDB");
+const uri = "mongodb+srv://ankadalahemanth:3xAiyYnoqmSgvMPS@hemanth.be8cr9d.mongodb.net/pharmaDB?retryWrites=true&w=majority";
+
+try {
+    // Connect to the MongoDB cluster
+     mongoose.connect(
+      uri,
+      { useNewUrlParser: true, useUnifiedTopology: true }
+    );
+  } catch (e) {
+    console.log("could not connect");
+  }
 
 const p = require("products.json");
 

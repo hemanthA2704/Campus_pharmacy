@@ -34,7 +34,44 @@ app.use(passport.session());
    
 
 // connect to database
-mongoose.connect("mongodb://localhost:27017/pharmaDB")
+// mongoose.connect("mongodb://localhost:27017/pharmaDB")
+
+
+// const { MongoClient, ServerApiVersion } = require('mongodb');
+
+const uri = process.env.URI;
+
+try {
+    // Connect to the MongoDB cluster
+     mongoose.connect(
+      uri,
+      { useNewUrlParser: true, useUnifiedTopology: true }
+    );
+  } catch (e) {
+    console.log("could not connect");
+  }
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// const client = new MongoClient(uri, {
+//   serverApi: {
+//     version: ServerApiVersion.v1,
+//     strict: true,
+//     deprecationErrors: true,
+//   }
+// });
+
+// async function run() {
+//   try {
+//     // Connect the client to the server	(optional starting in v4.7)
+//     await client.connect();
+//     // Send a ping to confirm a successful connection
+//     await client.db("pharmaDB").command({ ping: 1 });
+//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+//   } finally {
+//     // Ensures that the client will close when you finish/error
+//     await client.close();
+//   }
+// }
+// run().catch(console.dir);
 
 
 app.use("/", auth) ;
@@ -246,7 +283,7 @@ app.get("/nurse/:id",function(req,res){
 
 app.get("/nurse",function(req,res){
     if (!req.isAuthenticated()){
-        res.redirect("/")
+        res.redirect("/") ;
     } else {
         res.render("nurse")
     }
@@ -254,7 +291,7 @@ app.get("/nurse",function(req,res){
 
 app.post("/nurse",function(req,res){
     console.log(req.body.orderid);
-    if (req.isAuthenticated) {
+    if (req.isAuthenticated && req.user.type === "Staff") {
         res.redirect("/nurse/"+req.body.orderid)
     } else {
         res.send("Please login as Staff to continue")
@@ -298,6 +335,8 @@ app.get("/pharmacy",function(req,res){
     } else {
         if (req.user.type === "Pharmacy"){
             res.render("pharmacy_orders",{found : { meds : [] , id : ""}});
+        } else {
+            res.send("Sorry .This is page is not accesible.") ;
         }
         
     } 
