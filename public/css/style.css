@@ -203,7 +203,7 @@ header{
     transition: 0.5s;
 }
 body.activeTabCart .cartTab{
-    right: 0;
+    right: -310px;
 }
 body.activeTabCart .container{
     transform: translateX(-250px);
